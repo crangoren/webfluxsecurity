@@ -1,0 +1,14 @@
+server:
+  port: 8083
+
+spring:
+  r2dbc:
+    url: r2dbc:pool:postgres://localhost:5432/proselyte_webflux_security
+    username: postgres
+    password: 2103
+  flyway:
+    url: jdbc:postgresql://localhost:5432/proselyte_webflux_security
+    user: postgres
+    password: 2103
+    locations: classpath:db/migration
+
