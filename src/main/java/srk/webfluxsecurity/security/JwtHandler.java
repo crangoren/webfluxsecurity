@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 import srk.webfluxsecurity.exception.AuthException;
 import srk.webfluxsecurity.exception.UnauthorizedException;
 
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Date;
 
@@ -25,6 +26,8 @@ public class JwtHandler {
     private VerificationResult verify(String token){
         Claims claims = getClaimsFromToken(token);
         final Date expirationDate = claims.getExpiration();
+
+
         if(expirationDate.before(new Date())) {
             throw new RuntimeException("Token expired");
         }
@@ -33,7 +36,7 @@ public class JwtHandler {
 
     private Claims getClaimsFromToken(String token){
         return Jwts.parser()
-                .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes()))
+                .setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes(Charset.forName("UTF-8"))))
                 .parseClaimsJws(token)
                 .getBody();
     }

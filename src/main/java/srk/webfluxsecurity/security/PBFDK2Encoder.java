@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Base64;
@@ -24,7 +25,7 @@ public class PBFDK2Encoder implements PasswordEncoder {
     public String encode(CharSequence rawPassword) {
         try{
             byte[] result = SecretKeyFactory.getInstance(SECRET_KEY_INSTANCE)
-                    .generateSecret(new PBEKeySpec(rawPassword.toString().toCharArray(), secret.getBytes(), iteration, keyLength))
+                    .generateSecret(new PBEKeySpec(rawPassword.toString().toCharArray(), secret.getBytes(Charset.forName("UTF-8")), iteration, keyLength))
                     .getEncoded();
             return Base64.getEncoder()
                     .encodeToString(result);

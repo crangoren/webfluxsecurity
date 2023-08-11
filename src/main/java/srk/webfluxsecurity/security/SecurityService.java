@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import srk.webfluxsecurity.entity.UserEntity;
 import srk.webfluxsecurity.exception.AuthException;
-import srk.webfluxsecurity.repository.UserRepository;
+import srk.webfluxsecurity.service.UserService;
 
+import java.nio.charset.Charset;
 import java.util.*;
 
 @Component
 @RequiredArgsConstructor
 public class SecurityService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${jwt.secret}")
@@ -30,6 +31,7 @@ public class SecurityService {
     private TokenDetails generateToken(UserEntity user){
         Map<String, Object> claims= new HashMap<>() {{
             put("role", user.getRole());
+            put("username", user.getUsername());
         }};
         return generateToken(claims, user.getId().toString());
     }
@@ -50,7 +52,7 @@ public class SecurityService {
                 .setIssuedAt(createdDate)
                 .setId(UUID.randomUUID().toString())
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.getBytes()))
+                .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.getBytes(Charset.forName("UTF-8"))))
                 .compact();
 
 
@@ -61,8 +63,8 @@ public class SecurityService {
                 .build();
     }
 
-    Mono<TokenDetails> authenticate(String username, String password) {
-        return userRepository.findByUsername(username)
+    public Mono<TokenDetails> authenticate(String username, String password) {
+        return userService.getUserByUsername(username)
                 .flatMap(user -> {
                     if(!user.isEnabled()) {
                         return Mono.error(new AuthException("Account disabled", "RSK_USER_ACCOUNT_DISABLED"));
